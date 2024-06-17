@@ -55,3 +55,9 @@ INSERT INTO volunteer VALUES (1, 'Рамиль', 'https://t.me/omil8');
 INSERT INTO volunteer VALUES (2, 'Алексей', 'https://t.me/SilPliS');
 INSERT INTO volunteer VALUES (3, 'Игорь', 'https://t.me/Poteriashka163');
 INSERT INTO volunteer VALUES (4, 'Константин', 'https://t.me/sfall3003');
+
+-- changeset a.gavrin:5
+ALTER TABLE report RENAME COLUMN pet_photo TO pet_photo_path;
+
+-- changeset a.gavrin:6
+ALTER TABLE report ALTER COLUMN pet_photo_path TYPE VARCHAR;
