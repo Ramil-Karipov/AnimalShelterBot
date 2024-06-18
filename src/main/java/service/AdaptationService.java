@@ -2,8 +2,6 @@ package service;
 
 import pro.sky.telegrambot.model.AdaptationModel;
 
-import java.time.LocalDate;
-
 public interface AdaptationService {
 
     AdaptationModel addAdaptation (AdaptationModel adaptationModel);
