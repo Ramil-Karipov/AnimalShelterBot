@@ -1,8 +1,8 @@
-package service.impl;
+package pro.sky.telegrambot.service.impl;
 
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.model.AdaptationModel;
-import service.AdaptationService;
+import pro.sky.telegrambot.service.AdaptationService;
 
 import java.time.LocalDate;
 
