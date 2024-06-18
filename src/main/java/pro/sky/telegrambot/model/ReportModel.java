@@ -7,22 +7,25 @@ import javax.persistence.*;
 public class ReportModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
+    @Column(name = "report_date")
     private String reportDate;
-    private Long clientId;
+    @Column(name = "client_id")
+    private int clientId;
+    @Column(name = "pet_id")
     private Long petId;
+    @Column(name = "pet_photo_path")
     private String petPhotoPath;
+    @Column(name = "pet_info")
     private String petInfo;
-    private boolean accepted;
+    @Column(name = "is_accepted")
+    private boolean isAccepted;
 
-    public ReportModel() {
-    }
-
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -34,11 +37,11 @@ public class ReportModel {
         this.reportDate = reportDate;
     }
 
-    public Long getClientId() {
+    public int getClientId() {
         return clientId;
     }
 
-    public void setClientId(Long clientId) {
+    public void setClientId(int clientId) {
         this.clientId = clientId;
     }
 
@@ -67,10 +70,10 @@ public class ReportModel {
     }
 
     public boolean isAccepted() {
-        return accepted;
+        return isAccepted;
     }
 
     public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
+        isAccepted = accepted;
     }
 }

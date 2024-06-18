@@ -1,4 +1,4 @@
-package service;
+package pro.sky.telegrambot.service;
 
 import pro.sky.telegrambot.model.ReportModel;
 

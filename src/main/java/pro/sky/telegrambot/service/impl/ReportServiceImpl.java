@@ -1,10 +1,10 @@
-package service.impl;
+package pro.sky.telegrambot.service.impl;
 
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.exception.ReportNotFoundException;
 import pro.sky.telegrambot.model.ReportModel;
 import pro.sky.telegrambot.repository.ReportRepository;
-import service.ReportService;
+import pro.sky.telegrambot.service.ReportService;
 
 @Service
 public class ReportServiceImpl implements ReportService {
