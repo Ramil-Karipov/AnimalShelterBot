@@ -48,6 +48,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private String dogHandlersAdvices;
     @Value("${info.refuse:нет данных}")
     private String refuse;
+    @Value("${howToGet.image.path:нет данных}")
+    private String howToGetImagePath;
+    @Value("${reportForm.image.path:нет данных}")
+    private String reportFormImagePath;
 
     @Autowired
     private TelegramBot telegramBot;
@@ -137,7 +141,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             break;
                         case ("/howtoget"):
                             send = new SendMessage(chatId, "Схема проезда до нашего приюта:");
-                            photo = new SendPhoto(chatId, new File("src/main/java/pro/sky/telegrambot/data/howtoget.jpg"));
+                            photo = new SendPhoto(chatId, new File(howToGetImagePath));
                             break;
                         case ("/securityinfo"):
                             send = new SendMessage(chatId, security);
@@ -163,7 +167,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                     "сделанное в условиях хорошего освещения с прикрепленным к нему текстом отчета.\n" +
                                     "Отчет должен содержать полную информацию, согласно пунктам, указанным в образце формы.\n" +
                                     "Образец формы:");
-                            photo = new SendPhoto(chatId, new File("src/main/java/pro/sky/telegrambot/data/reportForm.jpg"));
+                            photo = new SendPhoto(chatId, new File(reportFormImagePath));
                             break;
                         case ("/homeforpuppy"):
                             send = new SendMessage(chatId, puppy);
@@ -204,5 +208,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
+    }
+
+    public void sendCustomMessage(Long chatId, String text) {
+        SendMessage messageToSend = new SendMessage(chatId, text);
+        telegramBot.execute(messageToSend);
     }
 }
