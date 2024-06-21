@@ -7,13 +7,17 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.model.VolunteerModel;
+import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -47,6 +51,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Autowired
     private TelegramBot telegramBot;
+    @Autowired
+    private VolunteerServiceImpl volunteerService;
 
     @PostConstruct
     public void init() {
@@ -81,6 +87,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 //Общая переменная для отправки сообщений пользователю, которая будет переопределяться в зависимости от
                 //содержания отправляемых сообщений
                 SendMessage send;
+                //Общая переменная для отправки в чат ботом картинок
+                SendPhoto photo = null;
 
                 //Обрабатываем команду /start
                 if (text.equalsIgnoreCase("/start") && message != null) {
@@ -121,13 +129,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     //Основной блок обработки команд. По мере реализации методов командой будем их вставлять сюда
                     switch (text) {
                         case ("/registration"):
-                            send = new SendMessage(chatId, "Еще не реализован функционал");     //Заглушка до реализации
+                            send = new SendMessage(chatId, "Для регистрации в базе усыновителей нашего приюта, пришлите" +
+                                    " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +79**-***-**-** - Ваше имя");
                             break;
                         case ("/shelterinfo"):
                             send = new SendMessage(chatId, shelter);
                             break;
                         case ("/howtoget"):
-                            send = new SendMessage(chatId, "Еще не реализован функционал");     //Заглушка до реализации
+                            send = new SendMessage(chatId, "Схема проезда до нашего приюта:");
+                            photo = new SendPhoto(chatId, new File("src/main/java/pro/sky/telegrambot/data/howtoget.jpg"));
                             break;
                         case ("/securityinfo"):
                             send = new SendMessage(chatId, security);
@@ -148,7 +158,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             send = new SendMessage(chatId, toTransport);
                             break;
                         case ("/reportform"):
-                            send = new SendMessage(chatId, "Еще не реализован функционал");     //Заглушка до реализации
+                            send = new SendMessage(chatId, "Для отправки отчета о прохождении питомцем периода " +
+                                    "адаптации, пришлите одним сообщением фото питомца в достаточно большом разрешении и " +
+                                    "сделанное в условиях хорошего освещения с прикрепленным к нему текстом отчета.\n" +
+                                    "Отчет должен содержать полную информацию, согласно пунктам, указанным в образце формы.\n" +
+                                    "Образец формы:");
+                            photo = new SendPhoto(chatId, new File("src/main/java/pro/sky/telegrambot/data/reportForm.jpg"));
                             break;
                         case ("/homeforpuppy"):
                             send = new SendMessage(chatId, puppy);
@@ -169,12 +184,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             send = new SendMessage(chatId, refuse);
                             break;
                         case ("/volonteerscontacts"):
-                            send = new SendMessage(chatId, "Еще не реализован функционал");     //Заглушка до реализации
+                            VolunteerModel volunteerToContact = volunteerService.getRandomVolunteer();
+                            send = new SendMessage(chatId, "На все ваши вопросы всегда рад ответить наш волонтер:\n" +
+                                    volunteerToContact.getInfo());
                             break;
                         default:
                             send = new SendMessage(chatId, "Command not supported");
                     }
                     telegramBot.execute(send);
+                    if (photo != null) {
+                        telegramBot.execute(photo);
+                    }
                 }
             } catch (Exception e) {
                 //Ловим и обрабатываем любые исключения в процессе выполнения метода process()
