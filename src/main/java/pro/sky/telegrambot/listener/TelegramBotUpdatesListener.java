@@ -52,6 +52,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private String howToGetImagePath;
     @Value("${reportForm.image.path:нет данных}")
     private String reportFormImagePath;
+    @Value("${info.report:нет данных}")
+    private String reportInfo;
 
     @Autowired
     private TelegramBot telegramBot;
@@ -70,11 +72,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 logger.info("Processing update: {}", update);
 
                 //Здесь объявлены переменные для сущности сообщения message, для хранения извлеченного содержания текста text,
-                // для хранения идентификатора чата, с которого отправили сообщение chatId, для хранения имени пользователя userFirstName
+                // для хранения идентификатора чата, с которого отправили сообщение chatId
                 Message message = update.message();
                 String text;
                 Long chatId;
-                String userFirstName;
 
                 //Здесь извлекаем нужные нам данные либо из message (если команда отправлялась с клавиатуры), либо из callbackQuery (если
                 //команда отправлялась кнопкой меню и в message у нас null
@@ -97,8 +98,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 //Обрабатываем команду /start
                 if (text.equalsIgnoreCase("/start") && message != null) {
                     send = new SendMessage(chatId, "Привет, " + message.from().firstName() + "! Это чат-бот приюта домашних животных." +
-                            "Для получения списка доступных команд, введи команду '/menu'" +
-                            " или воспользуйся кнопкой в левом нижнем углу.");
+                            "Для получения списка доступных команд, введи команду '/menu'");
                     telegramBot.execute(send);
 
                     //Строим меню из кнопок по команде /menu
@@ -134,7 +134,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     switch (text) {
                         case ("/registration"):
                             send = new SendMessage(chatId, "Для регистрации в базе усыновителей нашего приюта, пришлите" +
-                                    " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +79**-***-**-** - Ваше имя");
+                                    " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +7-9**-***-**-** - Ваше имя");
                             break;
                         case ("/shelterinfo"):
                             send = new SendMessage(chatId, shelter);
@@ -162,11 +162,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             send = new SendMessage(chatId, toTransport);
                             break;
                         case ("/reportform"):
-                            send = new SendMessage(chatId, "Для отправки отчета о прохождении питомцем периода " +
-                                    "адаптации, пришлите одним сообщением фото питомца в достаточно большом разрешении и " +
-                                    "сделанное в условиях хорошего освещения с прикрепленным к нему текстом отчета.\n" +
-                                    "Отчет должен содержать полную информацию, согласно пунктам, указанным в образце формы.\n" +
-                                    "Образец формы:");
+                            send = new SendMessage(chatId, reportInfo);
                             photo = new SendPhoto(chatId, new File(reportFormImagePath));
                             break;
                         case ("/homeforpuppy"):
