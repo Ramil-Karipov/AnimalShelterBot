@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class ReportModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "report_date")
     private LocalDateTime reportDate;
@@ -17,7 +17,7 @@ public class ReportModel {
     private Integer clientId;
 
     @Column(name = "pet_id")
-    private Long petId;
+    private Integer petId;
 
     @Column(name = "pet_photo_path")
     private String petPhotoPath;
