@@ -13,6 +13,10 @@ public class VolunteerServiceImpl {
         this.repository = repository;
     }
 
+    public VolunteerModel findVolunteerById(Integer volunteerId) {
+        return repository.findById(volunteerId).orElse(getRandomVolunteer());
+    }
+
     public VolunteerModel getRandomVolunteer() {
         return repository.getRandomVolunteer();
     }
