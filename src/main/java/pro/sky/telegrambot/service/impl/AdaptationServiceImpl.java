@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.exception.AdaptationNotFoundException;
+import pro.sky.telegrambot.exception.PetNotFoundException;
 import pro.sky.telegrambot.listener.TelegramBotUpdatesListener;
 import pro.sky.telegrambot.model.AdaptationModel;
+import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.model.VolunteerModel;
 import pro.sky.telegrambot.repository.AdaptationRepository;
 import pro.sky.telegrambot.service.AdaptationService;
@@ -23,6 +25,7 @@ public class AdaptationServiceImpl implements AdaptationService {
     private final Logger logger = LoggerFactory.getLogger(AdaptationServiceImpl.class);
     private final AdaptationRepository adaptationRepository;
     private final VolunteerServiceImpl volunteerService;
+    private final PetServiceImpl petService;
     private final TelegramBotUpdatesListener listener;
     /**
      * Переменная, хранящая текст информационного сообщения, направляемого пользователю в случае продления периода адаптации.
@@ -50,9 +53,10 @@ public class AdaptationServiceImpl implements AdaptationService {
     @Value("${info.client.warn:нет данных}")
     private String clientWarnInfoMessage;
 
-    public AdaptationServiceImpl(AdaptationRepository adaptationRepository, VolunteerServiceImpl volunteerService, TelegramBotUpdatesListener listener) {
+    public AdaptationServiceImpl(AdaptationRepository adaptationRepository, VolunteerServiceImpl volunteerService, PetServiceImpl petService, TelegramBotUpdatesListener listener) {
         this.adaptationRepository = adaptationRepository;
         this.volunteerService = volunteerService;
+        this.petService = petService;
         this.listener = listener;
     }
 
@@ -64,19 +68,19 @@ public class AdaptationServiceImpl implements AdaptationService {
      * @param volunteerId Идентификатор волонтера, назначенного ответственным за процесс адаптации. Соответствует значению поля id из таблицы volunteer
      * @return {@link AdaptationModel} Созданный на основе переданных параметров процесс адаптации.
      */
-    public AdaptationModel createAdaptation(Integer petId, Integer clientId, Integer volunteerId) {
+    public AdaptationModel createAdaptation(Integer petId, Integer clientId, Integer volunteerId) throws PetNotFoundException {
 
 //        Тут для реализации нужны два метода для получения записей из БД по id, реализованные в PetService и
 //        ClientService. В случае не нахождения сущностей в БД по указанным id, они должны выбрасывать соответствующие Exeption'ы
 
-//        PetModel petToAdopt = petService.findPetById(petId);
+        PetModel petToAdopt = petService.findById(petId);
 //        ClientModel adoptingClient = clientService.findClientById(clientId);
 
 //        После того как успешно получены соответствующие записи из БД, необходимо проверить, не имеет ли питомец статус
 //        "на руках" и нет ли у данного клиента уже на руках какого-то другого питомца:
-//        if (petToAdopt.getIsAdopted) {
-//          throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
-//          }
+        if (petToAdopt.getAdopted()) {
+          throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
+          }
 //        if (adoptingClient.getPetId != null) {
 //          throw new RuntimeException("У клиента с clientId = " + clientId + " уже есть на руках питомец с petId = " +
 //                  adoptingClient.getPetId + " в процессе адаптации");
@@ -93,8 +97,8 @@ public class AdaptationServiceImpl implements AdaptationService {
 
 //        После того как успешно завершился процесс создания адаптации для питомца и клиента, надо проапдейтить соответствующие
 //                им записи в БД, насетив в них изменения по полям is_adopted и pet_id:
-//        petToAdopt.setIsAdopted(true);
-//        petService.updatePet(petId, petToAdopt);
+        petToAdopt.setAdopted(true);
+        petService.updatePet(petId, petToAdopt);
 //        adoptingClient.setPetId(petId);
 //        clientService.updateClient(clientId, adoptingClient);
         logger.debug("Создание процесса адаптации прошло успешно.");
@@ -178,9 +182,9 @@ public class AdaptationServiceImpl implements AdaptationService {
 
 //        Здесь нужен метод для получения клиента из БД по его id и затем получения его chatId в телеграм
 //        ClientModel client = clientService.findById(clientId);
-//        PetModel pet = petService.findByPetId(petId);
-//        pet.setIsAdopted(false);                      - ставим снова false в колонке is_adopted в таблице pet
-//        petService.updatePet(petId, pet);
+        PetModel pet = petService.findById(petId);
+        pet.setAdopted(false);
+        petService.updatePet(petId, pet);
 //        client.setPetId(null);                        - ставим null в колонку pet_id в таблице client
 //        clientService.updateClient(clientId, client)
         sendMessageToClient(clientId, abortInfoMessage);
