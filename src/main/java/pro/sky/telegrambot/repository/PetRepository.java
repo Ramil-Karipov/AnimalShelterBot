@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import pro.sky.telegrambot.model.PetModel;
 
 @Repository
-public interface PetRepository extends JpaRepository<PetModel, Long> {
+public interface PetRepository extends JpaRepository<PetModel, Integer> {
 }

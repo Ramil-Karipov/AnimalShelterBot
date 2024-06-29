@@ -1,6 +1,7 @@
 package pro.sky.telegrambot.model;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "pet")
@@ -9,53 +10,47 @@ public class PetModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
-    @Column(name = "pet_view")
-    private String petView;
-    @Column(name = "pet_floor")
-    private String floor;
-    @Column(name = "pet_nickname")
-    private String nickname;
-    @Column(name = "pet_breed")
-    private String breed;
+    @Column(name = "pet_id")
+    private Integer petId;
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "is_adopted")
+    private Boolean isAdopted = false;
 
-    public Integer getId() {
-        return Id;
+    public PetModel() {
     }
 
-    public void setId(Integer id) {
-        Id = id;
+    public Integer getPetId() {
+        return petId;
     }
 
-    public String getPetView() {
-        return petView;
+    public void setPetId(Integer petId) {
+        this.petId = petId;
     }
 
-    public void setPetView(String petView) {
-        this.petView = petView;
+    public LocalDate getBirthDate() {
+        return birthDate;
     }
 
-    public String getFloor() {
-        return floor;
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
-    public void setFloor(String floor) {
-        this.floor = floor;
+    public String getName() {
+        return name;
     }
 
-    public String getNickname() {
-        return nickname;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public Boolean getAdopted() {
+        return isAdopted;
     }
 
-    public String getBreed() {
-        return breed;
-    }
-
-    public void setBreed(String breed) {
-        this.breed = breed;
+    public void setAdopted(Boolean adopted) {
+        isAdopted = adopted;
     }
 }
