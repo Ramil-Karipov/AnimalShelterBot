@@ -53,4 +53,8 @@ public class PetModel {
     public void setAdopted(Boolean adopted) {
         isAdopted = adopted;
     }
+
+    public String getInfoPet() {
+        return "Кличка: " + this.getName() + "  День рождение питомца: " + this.getBirthDate() + "\n";
+    }
 }
