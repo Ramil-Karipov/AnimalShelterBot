@@ -16,13 +16,13 @@ public class ClientModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "client_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "client_phone", nullable = false)
+    @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Column(name = "client_chat_id")
+    @Column(name = "chat_id")
     private Long chat_id ;
 
     @Column(name = "pet_id")
