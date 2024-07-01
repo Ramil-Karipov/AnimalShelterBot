@@ -14,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.model.VolunteerModel;
+import pro.sky.telegrambot.service.ClientService;
+import pro.sky.telegrambot.service.impl.PhoneNumberValidatorImpl;
 import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -59,6 +62,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private TelegramBot telegramBot;
     @Autowired
     private VolunteerServiceImpl volunteerService;
+    @Autowired
+    private PhoneNumberValidatorImpl phoneNumberValidator;
+    @Autowired
+    private ClientService clientService;
 
     @PostConstruct
     public void init() {
@@ -129,6 +136,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             new InlineKeyboardButton("Связаться с нашими волонтерами").callbackData("/volonteerscontacts"));
                     send = new SendMessage(chatId, "Главное меню бота. Выбери функцию:").replyMarkup(markup);
                     telegramBot.execute(send);
+                } else if (PhoneNumberValidatorImpl.isValid(Objects.requireNonNull(message).text())) {
+                    PhoneNumberValidatorImpl.saveClient(message.text(),clientService);
+
                 } else {
                     //Основной блок обработки команд. По мере реализации методов командой будем их вставлять сюда
                     switch (text) {
