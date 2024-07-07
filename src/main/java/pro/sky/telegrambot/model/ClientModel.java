@@ -29,7 +29,7 @@ public class ClientModel {
     private Integer pet_id ;
 
     public ClientModel(){
-    };
+    }
 
 
 
