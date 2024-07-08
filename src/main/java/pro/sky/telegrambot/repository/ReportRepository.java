@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import pro.sky.telegrambot.model.ReportModel;
 
 @Repository
-public interface ReportRepository extends JpaRepository<ReportModel, Long> {
+public interface ReportRepository extends JpaRepository<ReportModel, Integer> {
 }
