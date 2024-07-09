@@ -18,7 +18,7 @@ public class ClientServiceImpl implements ClientService {
         return clientRepository.save(clientModel);
     }
 
-    public Optional<ClientModel> getClient(Long id) {
+    public Optional<ClientModel> getClient(Integer id) {
         return clientRepository.findById(id);
     }
 
@@ -26,16 +26,16 @@ public class ClientServiceImpl implements ClientService {
         return clientRepository.findAll();
     }
 
-    public ClientModel updateClient(Long id, ClientModel clientDetails) {
+    public ClientModel updateClient(Integer id, ClientModel clientDetails) {
         ClientModel client = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
         client.setName(clientDetails.getName());
         client.setPhone(clientDetails.getPhone());
-        client.setChat_id(clientDetails.getChat_id());
-        client.setPet_id(clientDetails.getPet_id());
+        client.setChatId(clientDetails.getChatId());
+        client.setPetId(clientDetails.getPetId());
         return clientRepository.save(client);
     }
 
-    public void deleteClient(Long id) {
+    public void deleteClient(Integer id) {
         ClientModel client = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
         clientRepository.delete(client);
     }

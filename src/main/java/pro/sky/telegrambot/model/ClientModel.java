@@ -23,10 +23,10 @@ public class ClientModel {
     private String phone;
 
     @Column(name = "chat_id")
-    private Long chat_id ;
+    private Long chatId ;
 
     @Column(name = "pet_id")
-    private Integer pet_id ;
+    private Integer petId ;
 
     public ClientModel(){
     }
