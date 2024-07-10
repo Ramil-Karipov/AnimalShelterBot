@@ -15,4 +15,6 @@ public interface ClientService {
     void deleteClient(Integer id);
 
     List<ClientModel> getAllClients();
+
+    ClientModel getClientByChatId(Long chatId);
 }

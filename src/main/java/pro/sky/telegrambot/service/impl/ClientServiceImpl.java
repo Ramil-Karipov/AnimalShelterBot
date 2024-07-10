@@ -39,4 +39,9 @@ public class ClientServiceImpl implements ClientService {
         ClientModel client = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
         clientRepository.delete(client);
     }
+
+    public ClientModel getClientByChatId(Long chatId) {
+        Optional<ClientModel> optionalClient = clientRepository.findByChatId(chatId);
+        return optionalClient.orElse(null); // Или выбросьте исключение, если клиент не найден
+    }
 }
