@@ -12,7 +12,6 @@ public interface PetService {
 
     PetModel createPet(String name, String birthDate);
 
-    PetModel getInfoPet();
-
     PetModel PetServiceImpl(PetRepository petRepository);
+
 }

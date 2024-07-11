@@ -11,13 +11,14 @@ import java.time.LocalDate;
 import static pro.sky.telegrambot.model.PetModel.formatter;
 
 @Service
-public class PetServiceImpl implements PetService {
+public abstract class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
 
     public PetServiceImpl(PetRepository petRepository) {
         this.petRepository = petRepository;
     }
 
+    @Override
     public PetModel addPet(PetModel model) {
         return petRepository.save(model);
     }
@@ -43,9 +44,8 @@ public class PetServiceImpl implements PetService {
         LocalDate birthDay = LocalDate.parse(birthDate, formatter);
         createPet.setName(name);
         createPet.setBirthDate(birthDay);
-        return PetServiceImpl.addPet(createPet);
+        return addPet(createPet);
     }
-
 
 }
 

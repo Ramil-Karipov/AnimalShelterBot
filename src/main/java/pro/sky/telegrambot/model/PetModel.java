@@ -58,5 +58,7 @@ public class PetModel {
 
     public String getInfoPet() {
         return "Кличка: " + this.getName() + "  День рождение питомца: " + this.getBirthDate() + "\n";
+
     }
 }
+
