@@ -239,8 +239,8 @@ public class AdaptationServiceImpl implements AdaptationService {
     public void sendMessageToAppointedVolunteer(AdaptationModel adaptation, String text) {
         Integer volunteerId = adaptation.getVolunteerId();
         VolunteerModel volunteer = volunteerService.findVolunteerById(volunteerId);
-//        Long volunteerChatId = volunteer.getChatId();
-//        listener.sendCustomMessage(volunteerChatId, text);
+        Long volunteerChatId = volunteer.getChatId();
+        listener.sendCustomMessage(volunteerChatId, text);
     }
 
     public void sendMessageToClient(Integer clientId, String text) {
