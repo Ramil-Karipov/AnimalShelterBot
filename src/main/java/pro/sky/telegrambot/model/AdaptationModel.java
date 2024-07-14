@@ -119,11 +119,15 @@ public class AdaptationModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdaptationModel that = (AdaptationModel) o;
-        return Objects.equals(getId(), that.getId());
+        return  Objects.equals(getId(), that.getId()) && Objects.equals(getPetId(), that.getPetId()) &&
+                Objects.equals(getClientId(), that.getClientId()) && Objects.equals(getVolunteerId(),
+                that.getVolunteerId()) && Objects.equals(getLastReportDate(), that.getLastReportDate()) &&
+                Objects.equals(getFinishDate(), that.getFinishDate()) && Objects.equals(isFinished, that.isFinished);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getPetId(), getClientId(), getVolunteerId(), getLastReportDate(),
+                getFinishDate(), isFinished);
     }
 }

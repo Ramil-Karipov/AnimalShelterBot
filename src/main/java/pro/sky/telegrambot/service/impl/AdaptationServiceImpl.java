@@ -82,20 +82,23 @@ public class AdaptationServiceImpl implements AdaptationService {
         ClientModel adoptingClient = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
 
         if (petToAdopt.getAdopted()) {
-          throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
-          }
-        if (adoptingClient.getPetId() != null) {
-          throw new RuntimeException("У клиента с clientId = " + clientId + " уже есть на руках питомец с petId = " +
-                  adoptingClient.getPetId() + " в процессе адаптации");
+            throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
         }
+        if (adoptingClient.getPetId() != null) {
+            throw new RuntimeException("У клиента с clientId = " + clientId + " уже есть на руках питомец с petId = " +
+                    adoptingClient.getPetId() + " в процессе адаптации");
+        }
+
+        VolunteerModel appointedVolunteer = volunteerService.findVolunteerById(volunteerId);
+
 //        Для определения даты отчета и даты окончания адаптации воспользуемся методами класса LocalDate. Для поля "дата
 //        последнего отчета" при создании адаптации проставляем текущую дату. В дальнейшем она должна меняться при присвоении
 //        последнему связанному отчету статуса "принят" (is_accepted = true)
         LocalDate lastReportDate = LocalDate.now();
         LocalDate finishDate = LocalDate.now().plusMonths(1);
 
-        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getPetId(), adoptingClient.getId(), volunteerId,
-                lastReportDate, finishDate);
+        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getPetId(), adoptingClient.getId(),
+                appointedVolunteer.getId(), lastReportDate, finishDate);
         addAdaptation(creatingAdaptation);
 
 //        После того как успешно завершился процесс создания адаптации для питомца и клиента, надо проапдейтить соответствующие
@@ -160,7 +163,7 @@ public class AdaptationServiceImpl implements AdaptationService {
     public AdaptationModel extendAdaptation(Integer petId, Integer days) throws AdaptationNotFoundException {
         if (days <= 0) {
             logger.error("Количество дней для продления должно быть положительным.");
-            throw new RuntimeException();
+            throw new RuntimeException("Invalid days value");
         }
         AdaptationModel adaptationToExtend = findAdaptationByPetId(petId);
         adaptationToExtend.setFinishDate(adaptationToExtend.getFinishDate().plusDays(days));
@@ -173,6 +176,7 @@ public class AdaptationServiceImpl implements AdaptationService {
     /**
      * Метод для досрочного прерывания процесса адаптации. При вызове отправляет клиенту, связанному с
      * процессом адаптации информационное сообщение о прерывании адаптации.
+     *
      * @param petId Идентификатор питомца, проходящего процесс адаптации. Соответствует значению поля id из таблицы pet
      * @throws AdaptationNotFoundException в случае, если переданному {@code petId} питомца не соответствует ни один активный процесс адаптации
      */
@@ -200,7 +204,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
-    public void finishAdaptations() {
+    private void finishAdaptations() {
         List<AdaptationModel> adaptationsToFinish = adaptationRepository.getAllAdaptationsWithFinishDateLessThen(
                 LocalDate.now());
         adaptationsToFinish.forEach(adaptationModel -> {
@@ -223,7 +227,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * проблемным процессом. Вызывается по расписанию с периодичностью - раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
-    public void sendWarnings() {
+    private void sendWarnings() {
         List<AdaptationModel> adaptationsToWarn = adaptationRepository.getAllAdaptationsWithLastReportDateLessThen(
                 LocalDate.now().minusDays(1));
         adaptationsToWarn.forEach(adaptationModel -> {
@@ -238,16 +242,16 @@ public class AdaptationServiceImpl implements AdaptationService {
         );
     }
 
-    public void sendMessageToAppointedVolunteer(AdaptationModel adaptation, String text) {
+    private void sendMessageToAppointedVolunteer(AdaptationModel adaptation, String text) {
         Integer volunteerId = adaptation.getVolunteerId();
         VolunteerModel volunteer = volunteerService.findVolunteerById(volunteerId);
         Long volunteerChatId = volunteer.getChatId();
         listener.sendCustomMessage(volunteerChatId, text);
     }
 
-    public void sendMessageToClient(Integer clientId, String text) {
-       ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
-       Long clientChatId = client.getChatId();
-       listener.sendCustomMessage(clientChatId, text);
+    private void sendMessageToClient(Integer clientId, String text) {
+        ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+        Long clientChatId = client.getChatId();
+        listener.sendCustomMessage(clientChatId, text);
     }
 }
