@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface ClientRepository extends JpaRepository<ClientModel, Integer> {
     Optional<ClientModel> findByChatId(Long chatId);
+    Optional<ClientModel> findByPhone(String phone);
 }
