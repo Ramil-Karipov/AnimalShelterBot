@@ -3,15 +3,20 @@ package pro.sky.telegrambot.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.exception.AdaptationNotFoundException;
+import pro.sky.telegrambot.exception.ClientNotFoundException;
 import pro.sky.telegrambot.exception.PetNotFoundException;
 import pro.sky.telegrambot.listener.TelegramBotUpdatesListener;
 import pro.sky.telegrambot.model.AdaptationModel;
+import pro.sky.telegrambot.model.ClientModel;
 import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.model.VolunteerModel;
 import pro.sky.telegrambot.repository.AdaptationRepository;
 import pro.sky.telegrambot.service.AdaptationService;
+import pro.sky.telegrambot.service.ClientService;
+import pro.sky.telegrambot.service.PetService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +30,8 @@ public class AdaptationServiceImpl implements AdaptationService {
     private final Logger logger = LoggerFactory.getLogger(AdaptationServiceImpl.class);
     private final AdaptationRepository adaptationRepository;
     private final VolunteerServiceImpl volunteerService;
-    private final PetServiceImpl petService;
+    private final PetService petService;
+    private final ClientService clientService;
     private final TelegramBotUpdatesListener listener;
     /**
      * Переменная, хранящая текст информационного сообщения, направляемого пользователю в случае продления периода адаптации.
@@ -53,10 +59,12 @@ public class AdaptationServiceImpl implements AdaptationService {
     @Value("${info.client.warn:нет данных}")
     private String clientWarnInfoMessage;
 
-    public AdaptationServiceImpl(AdaptationRepository adaptationRepository, VolunteerServiceImpl volunteerService, PetServiceImpl petService, TelegramBotUpdatesListener listener) {
+    public AdaptationServiceImpl(AdaptationRepository adaptationRepository, VolunteerServiceImpl volunteerService,
+                                 PetServiceImpl petService, ClientServiceImpl clientService, TelegramBotUpdatesListener listener) {
         this.adaptationRepository = adaptationRepository;
         this.volunteerService = volunteerService;
         this.petService = petService;
+        this.clientService = clientService;
         this.listener = listener;
     }
 
@@ -70,40 +78,34 @@ public class AdaptationServiceImpl implements AdaptationService {
      */
     public AdaptationModel createAdaptation(Integer petId, Integer clientId, Integer volunteerId) throws PetNotFoundException {
 
-//        Тут для реализации нужны два метода для получения записей из БД по id, реализованные в PetService и
-//        ClientService. В случае не нахождения сущностей в БД по указанным id, они должны выбрасывать соответствующие Exeption'ы
-
         PetModel petToAdopt = petService.findById(petId);
-//        ClientModel adoptingClient = clientService.findClientById(clientId);
+        ClientModel adoptingClient = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
 
-//        После того как успешно получены соответствующие записи из БД, необходимо проверить, не имеет ли питомец статус
-//        "на руках" и нет ли у данного клиента уже на руках какого-то другого питомца:
         if (petToAdopt.getAdopted()) {
           throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
           }
-//        if (adoptingClient.getPetId != null) {
-//          throw new RuntimeException("У клиента с clientId = " + clientId + " уже есть на руках питомец с petId = " +
-//                  adoptingClient.getPetId + " в процессе адаптации");
-//        }
+        if (adoptingClient.getPetId() != null) {
+          throw new RuntimeException("У клиента с clientId = " + clientId + " уже есть на руках питомец с petId = " +
+                  adoptingClient.getPetId() + " в процессе адаптации");
+        }
 //        Для определения даты отчета и даты окончания адаптации воспользуемся методами класса LocalDate. Для поля "дата
 //        последнего отчета" при создании адаптации проставляем текущую дату. В дальнейшем она должна меняться при присвоении
 //        последнему связанному отчету статуса "принят" (is_accepted = true)
         LocalDate lastReportDate = LocalDate.now();
         LocalDate finishDate = LocalDate.now().plusMonths(1);
 
-//        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getId(), adoptingClient.getId(), volunteerId,
-//                lastReportDate, finishDate);
-//        addAdaptation(creatingAdaptation);
+        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getPetId(), adoptingClient.getId(), volunteerId,
+                lastReportDate, finishDate);
+        addAdaptation(creatingAdaptation);
 
 //        После того как успешно завершился процесс создания адаптации для питомца и клиента, надо проапдейтить соответствующие
-//                им записи в БД, насетив в них изменения по полям is_adopted и pet_id:
+//        им записи в БД, насетив в них изменения по полям is_adopted и pet_id:
         petToAdopt.setAdopted(true);
         petService.updatePet(petId, petToAdopt);
-//        adoptingClient.setPetId(petId);
-//        clientService.updateClient(clientId, adoptingClient);
+        adoptingClient.setPetId(petId);
+        clientService.updateClient(clientId, adoptingClient);
         logger.debug("Создание процесса адаптации прошло успешно.");
-//        return creatingAdaptation;
-        return null;
+        return creatingAdaptation;
     }
 
 
@@ -179,14 +181,12 @@ public class AdaptationServiceImpl implements AdaptationService {
         adaptationToAbort.setFinished(true);
         updateAdaptation(adaptationToAbort.getId(), adaptationToAbort);
         Integer clientId = adaptationToAbort.getClientId();
-
-//        Здесь нужен метод для получения клиента из БД по его id и затем получения его chatId в телеграм
-//        ClientModel client = clientService.findById(clientId);
+        ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
         PetModel pet = petService.findById(petId);
         pet.setAdopted(false);
         petService.updatePet(petId, pet);
-//        client.setPetId(null);                        - ставим null в колонку pet_id в таблице client
-//        clientService.updateClient(clientId, client)
+        client.setPetId(null);
+        clientService.updateClient(clientId, client);
         sendMessageToClient(clientId, abortInfoMessage);
         sendMessageToAppointedVolunteer(adaptationToAbort, "Период адаптации питомца petId = " + petId +
                 " завершен досрочно. Необходимо забрать его у усыновителя clientId = " + clientId +
@@ -199,15 +199,16 @@ public class AdaptationServiceImpl implements AdaptationService {
      * ними клиентам сообщение о завершении процесса адаптации с поздравлением. Вызывается по расписанию с периодичностью -
      * раз в сутки.
      */
+    @Scheduled(cron = "0 0 15 * * *")
     public void finishAdaptations() {
         List<AdaptationModel> adaptationsToFinish = adaptationRepository.getAllAdaptationsWithFinishDateLessThen(
                 LocalDate.now());
         adaptationsToFinish.forEach(adaptationModel -> {
                     adaptationModel.setFinished(true);
                     Integer clientId = adaptationModel.getClientId();
-//                    ClientModel client = clientService.findById(clientId);
-//                    client.setPetId(null);
-//                    clientService.updateClient(clientId, client);
+                    ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+                    client.setPetId(null);
+                    clientService.updateClient(clientId, client);
                     sendMessageToClient(clientId, finishInfoMessage);
                 }
         );
@@ -221,6 +222,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * А также отправляет ответственному за процесс волонтеру сообщение о необходимости дополнительного контроля над
      * проблемным процессом. Вызывается по расписанию с периодичностью - раз в сутки.
      */
+    @Scheduled(cron = "0 0 15 * * *")
     public void sendWarnings() {
         List<AdaptationModel> adaptationsToWarn = adaptationRepository.getAllAdaptationsWithLastReportDateLessThen(
                 LocalDate.now().minusDays(1));
@@ -244,8 +246,8 @@ public class AdaptationServiceImpl implements AdaptationService {
     }
 
     public void sendMessageToClient(Integer clientId, String text) {
-//       ClientModel client = clientService.findById(clientId);
-//       Long clientChatId = client.getChatId();
-//       listener.sendCustomMessage(clientChatId, text);
+       ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+       Long clientChatId = client.getChatId();
+       listener.sendCustomMessage(clientChatId, text);
     }
 }

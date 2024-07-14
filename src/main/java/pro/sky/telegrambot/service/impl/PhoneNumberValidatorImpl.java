@@ -35,7 +35,7 @@ public class PhoneNumberValidatorImpl {
         // Если номер не соответствует ни одному из форматов, выбрасываем исключение
         throw new IllegalArgumentException("Invalid phone number format: " + phoneNumber);
     }
-    //Метод для сохранения клиета в базе данных.
+    //Метод для сохранения клиента в базе данных.
     public static ClientModel saveClient(String message, ClientService clientService) {
         // Разделение сообщения на части
         String[] parts = message.split(" - ", 2);
