@@ -136,11 +136,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             new InlineKeyboardButton("Связаться с нашими волонтерами").callbackData("/volonteerscontacts"));
                     send = new SendMessage(chatId, "Главное меню бота. Выбери функцию:").replyMarkup(markup);
                     telegramBot.execute(send);
-                //Проверяет, является ли текст сообщения валидным.В случае успеха успеха выводит сообщение о регистрации.
+                    //Проверяет, является ли текст сообщения валидным.В случае успеха успеха выводит сообщение о регистрации.
                 } else if (message != null && PhoneNumberValidatorImpl.isValid(message.text())) {
-                    PhoneNumberValidatorImpl.saveClient(message.text(),clientService);
-                    send = new SendMessage(chatId, "Регистрация прошла успешно!");
-                    telegramBot.execute(send);
+                    if (phoneNumberValidator.isUserExist(message.text())) {
+                        send = new SendMessage(chatId, "Такой номер уже зарегестрирован.");
+                        telegramBot.execute(send);
+                    } else {
+                        PhoneNumberValidatorImpl.saveClient(message.text(), chatId, clientService);
+                        send = new SendMessage(chatId, "Регистрация прошла успешно!");
+                        telegramBot.execute(send);
+                    }
 
                 } else {
                     //Основной блок обработки команд. По мере реализации методов командой будем их вставлять сюда

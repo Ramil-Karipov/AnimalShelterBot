@@ -17,4 +17,6 @@ public interface ClientService {
     List<ClientModel> getAllClients();
 
     ClientModel getClientByChatId(Long chatId);
+
+
 }

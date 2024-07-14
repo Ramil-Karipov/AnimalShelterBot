@@ -11,8 +11,11 @@ import java.util.Optional;
 
 @Service
 public class ClientServiceImpl implements ClientService {
-    @Autowired
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
+
+    public ClientServiceImpl(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+    }
 
     public ClientModel createClient(ClientModel clientModel) {
         return clientRepository.save(clientModel);
@@ -44,4 +47,5 @@ public class ClientServiceImpl implements ClientService {
         Optional<ClientModel> optionalClient = clientRepository.findByChatId(chatId);
         return optionalClient.orElse(null); // Или выбросьте исключение, если клиент не найден
     }
+
 }
