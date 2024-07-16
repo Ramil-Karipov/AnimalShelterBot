@@ -81,10 +81,7 @@ public class AdaptationController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Сообщение о досрочном прерывании процесса адаптации.",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE
-                            )
+                            description = "Досрочное прерывание процесса адаптации."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -93,8 +90,7 @@ public class AdaptationController {
             }, tags = "Adaptations"
     )
     @GetMapping("/abort")
-    public String abort(@RequestParam Integer petId) {
+    public void abort(@RequestParam Integer petId) {
         adaptationService.abortAdaptation(petId);
-        return "Процесс адаптации питомца с petId = " + petId + " прерван досрочно";
     }
 }

@@ -12,8 +12,14 @@ public class VolunteerModel {
     String name;
     @Column(name = "tg_url")
     String telegramURL;
+    @Column(name = "chat_id")
+    Long chatId;
 
     public VolunteerModel() {
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getId() {
@@ -34,6 +40,14 @@ public class VolunteerModel {
 
     public void setTelegramURL(String telegramURL) {
         this.telegramURL = telegramURL;
+    }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
     }
 
     public String getInfo() {
