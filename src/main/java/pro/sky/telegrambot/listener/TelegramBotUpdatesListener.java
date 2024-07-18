@@ -13,7 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.model.VolunteerModel;
+import pro.sky.telegrambot.service.PetService;
 import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
@@ -59,6 +61,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private TelegramBot telegramBot;
     @Autowired
     private VolunteerServiceImpl volunteerService;
+    @Autowired
+    private PetService petService;
 
     @PostConstruct
     public void init() {
@@ -150,7 +154,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             send = new SendMessage(chatId, safety);
                             break;
                         case ("/pets"):
-                            send = new SendMessage(chatId, "Еще не реализован функционал");     //Заглушка до реализации
+                            List<PetModel> pets = petService.findAllByIsAdopted(false);
+                            StringBuilder response = new StringBuilder();
+                            for (PetModel pet : pets) {
+                                response.append(pet.getInfoPet()).append("\n");
+                            }
+                            send = new SendMessage(chatId, response.toString());
                             break;
                         case ("/documents"):
                             send = new SendMessage(chatId, documents);

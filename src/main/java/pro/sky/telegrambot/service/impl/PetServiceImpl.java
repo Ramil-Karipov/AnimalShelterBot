@@ -7,11 +7,12 @@ import pro.sky.telegrambot.repository.PetRepository;
 import pro.sky.telegrambot.service.PetService;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static pro.sky.telegrambot.model.PetModel.formatter;
 
 @Service
-public abstract class PetServiceImpl implements PetService {
+public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
 
     public PetServiceImpl(PetRepository petRepository) {
@@ -46,6 +47,12 @@ public abstract class PetServiceImpl implements PetService {
         createPet.setBirthDate(birthDay);
         return addPet(createPet);
     }
+
+    public List<PetModel> findAllByIsAdopted(Boolean isAdopted) {
+        return petRepository.findAllByIsAdopted(isAdopted);
+    }
+
+
 
 }
 

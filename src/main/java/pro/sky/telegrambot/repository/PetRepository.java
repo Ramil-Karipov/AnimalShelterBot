@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<PetModel, Integer> {
-    List<PetModel> findAllBylsAdopted(Boolean isAdopted);
+    List<PetModel> findAllByIsAdopted(Boolean isAdopted);
 
 }

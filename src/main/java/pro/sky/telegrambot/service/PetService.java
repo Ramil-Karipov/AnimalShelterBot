@@ -1,7 +1,8 @@
 package pro.sky.telegrambot.service;
 
 import pro.sky.telegrambot.model.PetModel;
-import pro.sky.telegrambot.repository.PetRepository;
+
+import java.util.List;
 
 public interface PetService {
     PetModel addPet(PetModel model);
@@ -12,6 +13,6 @@ public interface PetService {
 
     PetModel createPet(String name, String birthDate);
 
-    PetModel PetServiceImpl(PetRepository petRepository);
+    List<PetModel> findAllByIsAdopted(Boolean isAdopted);
 
 }
