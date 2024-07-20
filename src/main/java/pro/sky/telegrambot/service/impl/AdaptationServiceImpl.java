@@ -30,8 +30,8 @@ public class AdaptationServiceImpl implements AdaptationService {
     private final Logger logger = LoggerFactory.getLogger(AdaptationServiceImpl.class);
     private final AdaptationRepository adaptationRepository;
     private final VolunteerServiceImpl volunteerService;
-    private final PetService petService;
-    private final ClientService clientService;
+    private final PetService petServiceImpl;
+    private final ClientService clientServiceImpl;
     private final TelegramBotUpdatesListener listener;
     /**
      * Переменная, хранящая текст информационного сообщения, направляемого пользователю в случае продления периода адаптации.
@@ -60,11 +60,11 @@ public class AdaptationServiceImpl implements AdaptationService {
     private String clientWarnInfoMessage;
 
     public AdaptationServiceImpl(AdaptationRepository adaptationRepository, VolunteerServiceImpl volunteerService,
-                                 PetServiceImpl petService, ClientServiceImpl clientService, TelegramBotUpdatesListener listener) {
+                                 PetService petServiceImpl, ClientService clientServiceImpl, TelegramBotUpdatesListener listener) {
         this.adaptationRepository = adaptationRepository;
         this.volunteerService = volunteerService;
-        this.petService = petService;
-        this.clientService = clientService;
+        this.petServiceImpl = petServiceImpl;
+        this.clientServiceImpl = clientServiceImpl;
         this.listener = listener;
     }
 
@@ -76,10 +76,11 @@ public class AdaptationServiceImpl implements AdaptationService {
      * @param volunteerId Идентификатор волонтера, назначенного ответственным за процесс адаптации. Соответствует значению поля id из таблицы volunteer
      * @return {@link AdaptationModel} Созданный на основе переданных параметров процесс адаптации.
      */
+    @Override
     public AdaptationModel createAdaptation(Integer petId, Integer clientId, Integer volunteerId) throws PetNotFoundException {
 
-        PetModel petToAdopt = petService.findById(petId);
-        ClientModel adoptingClient = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+        PetModel petToAdopt = petServiceImpl.findById(petId);
+        ClientModel adoptingClient = clientServiceImpl.getClient(clientId).orElseThrow(ClientNotFoundException::new);
 
         if (petToAdopt.getAdopted()) {
             throw new RuntimeException("Питомец с petId = " + petId + " уже находится в процессе усыновления");
@@ -97,16 +98,16 @@ public class AdaptationServiceImpl implements AdaptationService {
         LocalDate lastReportDate = LocalDate.now();
         LocalDate finishDate = LocalDate.now().plusMonths(1);
 
-        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getPetId(), adoptingClient.getId(),
+        AdaptationModel creatingAdaptation = new AdaptationModel(petToAdopt.getId(), adoptingClient.getId(),
                 appointedVolunteer.getId(), lastReportDate, finishDate);
         addAdaptation(creatingAdaptation);
 
 //        После того как успешно завершился процесс создания адаптации для питомца и клиента, надо проапдейтить соответствующие
 //        им записи в БД, насетив в них изменения по полям is_adopted и pet_id:
         petToAdopt.setAdopted(true);
-        petService.updatePet(petId, petToAdopt);
+        petServiceImpl.updatePet(petId, petToAdopt);
         adoptingClient.setPetId(petId);
-        clientService.updateClient(clientId, adoptingClient);
+        clientServiceImpl.updateClient(clientId, adoptingClient);
         logger.debug("Создание процесса адаптации прошло успешно.");
         return creatingAdaptation;
     }
@@ -160,6 +161,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * @return {@link AdaptationModel} Период адаптации с увеличенной на переданное количество дней датой окончания.
      * @throws AdaptationNotFoundException в случае, если переданному {@code petId} питомца не соответствует ни один активный процесс адаптации
      */
+    @Override
     public AdaptationModel extendAdaptation(Integer petId, Integer days) throws AdaptationNotFoundException {
         if (days <= 0) {
             logger.error("Количество дней для продления должно быть положительным.");
@@ -180,17 +182,18 @@ public class AdaptationServiceImpl implements AdaptationService {
      * @param petId Идентификатор питомца, проходящего процесс адаптации. Соответствует значению поля id из таблицы pet
      * @throws AdaptationNotFoundException в случае, если переданному {@code petId} питомца не соответствует ни один активный процесс адаптации
      */
+    @Override
     public void abortAdaptation(Integer petId) throws AdaptationNotFoundException {
         AdaptationModel adaptationToAbort = findAdaptationByPetId(petId);
         adaptationToAbort.setFinished(true);
         updateAdaptation(adaptationToAbort.getId(), adaptationToAbort);
         Integer clientId = adaptationToAbort.getClientId();
-        ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
-        PetModel pet = petService.findById(petId);
+        ClientModel client = clientServiceImpl.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+        PetModel pet = petServiceImpl.findById(petId);
         pet.setAdopted(false);
-        petService.updatePet(petId, pet);
+        petServiceImpl.updatePet(petId, pet);
         client.setPetId(null);
-        clientService.updateClient(clientId, client);
+        clientServiceImpl.updateClient(clientId, client);
         sendMessageToClient(clientId, abortInfoMessage);
         sendMessageToAppointedVolunteer(adaptationToAbort, "Период адаптации питомца petId = " + petId +
                 " завершен досрочно. Необходимо забрать его у усыновителя clientId = " + clientId +
@@ -210,9 +213,9 @@ public class AdaptationServiceImpl implements AdaptationService {
         adaptationsToFinish.forEach(adaptationModel -> {
                     adaptationModel.setFinished(true);
                     Integer clientId = adaptationModel.getClientId();
-                    ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+                    ClientModel client = clientServiceImpl.getClient(clientId).orElseThrow(ClientNotFoundException::new);
                     client.setPetId(null);
-                    clientService.updateClient(clientId, client);
+                    clientServiceImpl.updateClient(clientId, client);
                     sendMessageToClient(clientId, finishInfoMessage);
                 }
         );
@@ -250,7 +253,7 @@ public class AdaptationServiceImpl implements AdaptationService {
     }
 
     private void sendMessageToClient(Integer clientId, String text) {
-        ClientModel client = clientService.getClient(clientId).orElseThrow(ClientNotFoundException::new);
+        ClientModel client = clientServiceImpl.getClient(clientId).orElseThrow(ClientNotFoundException::new);
         Long clientChatId = client.getChatId();
         listener.sendCustomMessage(clientChatId, text);
     }
