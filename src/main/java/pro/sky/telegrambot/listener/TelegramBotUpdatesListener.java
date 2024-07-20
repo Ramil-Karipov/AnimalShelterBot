@@ -16,11 +16,14 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.model.VolunteerModel;
 import pro.sky.telegrambot.service.PetService;
+import pro.sky.telegrambot.service.ClientService;
+import pro.sky.telegrambot.service.impl.PhoneNumberValidatorImpl;
 import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -63,6 +66,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private VolunteerServiceImpl volunteerService;
     @Autowired
     private PetService petService;
+    @Autowired
+    private PhoneNumberValidatorImpl phoneNumberValidator;
+    @Autowired
+    private ClientService clientService;
 
     @PostConstruct
     public void init() {
@@ -133,12 +140,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             new InlineKeyboardButton("Связаться с нашими волонтерами").callbackData("/volonteerscontacts"));
                     send = new SendMessage(chatId, "Главное меню бота. Выбери функцию:").replyMarkup(markup);
                     telegramBot.execute(send);
+                    //Проверяет, является ли текст сообщения валидным.В случае успеха успеха выводит сообщение о регистрации.
+                } else if (message != null && PhoneNumberValidatorImpl.isValid(message.text())) {
+                    if (phoneNumberValidator.isUserExist(message.text())) {
+                        send = new SendMessage(chatId, "Такой номер уже зарегестрирован.");
+                        telegramBot.execute(send);
+                    } else {
+                        PhoneNumberValidatorImpl.saveClient(message.text(), chatId, clientService);
+                        send = new SendMessage(chatId, "Регистрация прошла успешно!");
+                        telegramBot.execute(send);
+                    }
+
                 } else {
                     //Основной блок обработки команд. По мере реализации методов командой будем их вставлять сюда
                     switch (text) {
                         case ("/registration"):
                             send = new SendMessage(chatId, "Для регистрации в базе усыновителей нашего приюта, пришлите" +
-                                    " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +7-9**-***-**-** - Ваше имя");
+                                    " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +7-9**-***-**-** - Ваше имя" +
+                                    "\n +79********* - Ваше имя" + "\n 8-9**-***-**-** - Ваше имя" + "\n 8********** - Ваше имя");
                             break;
                         case ("/shelterinfo"):
                             send = new SendMessage(chatId, shelter);

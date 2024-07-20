@@ -1,45 +1,23 @@
-package pro.sky.telegrambot.model;
+package pro.sky.telegrambot.dto;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "report")
-public class ReportModel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name = "report_date")
+public class ReportUpdateDto {
+//    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate reportDate;
 
-    @Column(name = "client_id")
     private Integer clientId;
 
-    @Column(name = "pet_id")
     private Integer petId;
 
-    @Column(name = "pet_photo_path")
     private String petPhotoPath;
 
-    @Column(name = "pet_info")
     private String petInfo;
 
-    @Column(name = "is_accepted")
-    private boolean isAccepted;
-
-    @PrePersist
-    protected void onCreate() {
-        reportDate = LocalDate.now();
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    private Boolean isAccepted;
 
     public LocalDate getReportDate() {
         return reportDate;
@@ -81,11 +59,11 @@ public class ReportModel {
         this.petInfo = petInfo;
     }
 
-    public boolean isAccepted() {
+    public Boolean getAccepted() {
         return isAccepted;
     }
 
-    public void setAccepted(boolean accepted) {
+    public void setAccepted(Boolean accepted) {
         isAccepted = accepted;
     }
 }

@@ -61,3 +61,12 @@ ALTER TABLE report RENAME COLUMN pet_photo TO pet_photo_path;
 
 -- changeset a.gavrin:6
 ALTER TABLE report ALTER COLUMN pet_photo_path TYPE VARCHAR;
+
+-- changeset a.gavrin:7
+ALTER TABLE volunteer ADD COLUMN chat_id BIGINT;
+
+-- changeset a.gavrin:8
+UPDATE volunteer SET chat_id = 5408065139 WHERE id = 1;
+UPDATE volunteer SET chat_id = 355188608 WHERE id = 2;
+UPDATE volunteer SET chat_id = 702814928 WHERE id = 3;
+UPDATE volunteer SET chat_id = 129474100 WHERE id = 4;
