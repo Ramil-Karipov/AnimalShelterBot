@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class PetNotFoundException extends RuntimeException {
     public PetNotFoundException() {
-        super("Питомец не найден");
+        super("Pet not found");
     }
 }

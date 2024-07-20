@@ -6,6 +6,11 @@ import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.repository.PetRepository;
 import pro.sky.telegrambot.service.PetService;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import static pro.sky.telegrambot.model.PetModel.formatter;
+
 @Service
 public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
@@ -34,4 +39,20 @@ public class PetServiceImpl implements PetService {
     public PetModel findById(Integer id) {
         return petRepository.findById(id).orElseThrow(PetNotFoundException::new);
     }
+
+    public PetModel createPet(String name, String birthDate) {
+        PetModel createPet = new PetModel();
+        LocalDate birthDay = LocalDate.parse(birthDate, formatter);
+        createPet.setName(name);
+        createPet.setBirthDate(birthDay);
+        return addPet(createPet);
+    }
+
+    public List<PetModel> findAllByIsAdopted(Boolean isAdopted) {
+        return petRepository.findAllByIsAdopted(isAdopted);
+    }
+
+
+
 }
+

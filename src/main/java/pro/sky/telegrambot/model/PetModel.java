@@ -2,6 +2,7 @@ package pro.sky.telegrambot.model;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "pet")
@@ -18,6 +19,7 @@ public class PetModel {
     private String name;
     @Column(name = "is_adopted")
     private Boolean isAdopted = false;
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public PetModel() {
     }
@@ -53,4 +55,10 @@ public class PetModel {
     public void setAdopted(Boolean adopted) {
         isAdopted = adopted;
     }
+
+    public String getInfoPet() {
+        return "Кличка: " + this.getName() + "  День рождение питомца: " + this.getBirthDate() + "\n";
+
+    }
 }
+
