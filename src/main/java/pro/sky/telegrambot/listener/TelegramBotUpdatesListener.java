@@ -140,7 +140,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             new InlineKeyboardButton("Связаться с нашими волонтерами").callbackData("/volonteerscontacts"));
                     send = new SendMessage(chatId, "Главное меню бота. Выбери функцию:").replyMarkup(markup);
                     telegramBot.execute(send);
-                    //Проверяет, является ли текст сообщения валидным.В случае успеха успеха выводит сообщение о регистрации.
+                    //Проверяет, является ли текст сообщения валидным. В случае успеха выводит сообщение о регистрации.
                 } else if (message != null && PhoneNumberValidatorImpl.isValid(message.text())) {
                     if (phoneNumberValidator.isUserExist(message.text())) {
                         send = new SendMessage(chatId, "Такой номер уже зарегестрирован.");

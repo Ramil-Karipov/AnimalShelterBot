@@ -66,13 +66,13 @@ class AdaptationServiceImplTest {
         testClientWithoutPet.setChatId(777777L);
 
         testPetAdopted = new PetModel();
-        testPetAdopted.setPetId(1);
+        testPetAdopted.setId(1);
         testPetAdopted.setName("PetAdopted");
         testPetAdopted.setBirthDate(LocalDate.parse("01.01.2020", formatter));
         testPetAdopted.setAdopted(true);
 
         testPetNotAdopted = new PetModel();
-        testPetNotAdopted.setPetId(2);
+        testPetNotAdopted.setId(2);
         testPetNotAdopted.setName("PetNotAdopted");
         testPetNotAdopted.setBirthDate(LocalDate.parse("02.02.2020", formatter));
 
@@ -125,7 +125,7 @@ class AdaptationServiceImplTest {
         when(petService.findById(0)).thenThrow(PetNotFoundException.class);
         assertThrows(PetNotFoundException.class, () ->
             adaptationService.createAdaptation(0, 2, 2)
-        , "Питомец не найден");
+        , "Pet not found");
     }
 
     @Test

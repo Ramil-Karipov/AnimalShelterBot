@@ -11,8 +11,7 @@ public class PetModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pet_id")
-    private Integer petId;
+    private Integer id;
     @Column(name = "birth_date")
     private LocalDate birthDate;
     @Column(name = "name")
@@ -24,12 +23,12 @@ public class PetModel {
     public PetModel() {
     }
 
-    public Integer getPetId() {
-        return petId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setPetId(Integer petId) {
-        this.petId = petId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public LocalDate getBirthDate() {
@@ -57,7 +56,7 @@ public class PetModel {
     }
 
     public String getInfoPet() {
-        return "Кличка: " + this.getName() + "  День рождение питомца: " + this.getBirthDate() + "\n";
+        return "Кличка: " + this.getName() + ".  День рождения питомца: " + this.getBirthDate().format(formatter);
 
     }
 }

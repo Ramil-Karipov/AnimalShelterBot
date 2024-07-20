@@ -1,11 +1,10 @@
 package pro.sky.telegrambot.service;
 
-import pro.sky.telegrambot.exception.AdaptationNotFoundException;
 import pro.sky.telegrambot.model.AdaptationModel;
 
-import java.util.Optional;
-
 public interface AdaptationService {
+
+    AdaptationModel createAdaptation(Integer petId, Integer clientId, Integer volunteerId);
 
     AdaptationModel addAdaptation (AdaptationModel adaptationModel);
 
@@ -14,4 +13,8 @@ public interface AdaptationService {
     AdaptationModel updateAdaptation (Integer id, AdaptationModel adaptationModel);
 
     AdaptationModel findAdaptationByPetId (Integer petId);
+
+    AdaptationModel extendAdaptation(Integer petId, Integer days);
+
+    void abortAdaptation(Integer petId);
 }
