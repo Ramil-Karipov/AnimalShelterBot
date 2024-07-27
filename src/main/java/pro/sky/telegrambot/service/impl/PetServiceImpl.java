@@ -55,11 +55,12 @@ public class PetServiceImpl implements PetService {
             logger.error("Invalid date format");
             throw new IllegalArgumentException("Invalid date format");
         }
-            PetModel createPet = new PetModel();
+            PetModel creatingPet = new PetModel();
             LocalDate birthDay = LocalDate.parse(birthDate, formatter);
-            createPet.setName(name);
-            createPet.setBirthDate(birthDay);
-            return addPet(createPet);
+            creatingPet.setName(name);
+            creatingPet.setBirthDate(birthDay);
+            addPet(creatingPet);
+            return creatingPet;
     }
 
     public List<PetModel> findAllByIsAdopted(Boolean isAdopted) {
