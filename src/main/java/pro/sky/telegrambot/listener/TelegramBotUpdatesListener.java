@@ -11,57 +11,28 @@ import com.pengrad.telegrambot.request.SendPhoto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.configuration.TelegramBotConfiguration;
 import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.model.VolunteerModel;
-import pro.sky.telegrambot.service.PetService;
 import pro.sky.telegrambot.service.ClientService;
+import pro.sky.telegrambot.service.PetService;
 import pro.sky.telegrambot.service.impl.PhoneNumberValidatorImpl;
 import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-    @Value("${info.shelter:нет данных}")
-    private String shelter;
-    @Value("${info.security:нет данных}")
-    private String security;
-    @Value("${info.safety:нет данных}")
-    private String safety;
-    @Value("${info.acquaintance:нет данных}")
-    private String acquaintance;
-    @Value("${info.documents:нет данных}")
-    private String documents;
-    @Value("${info.totransport:нет данных}")
-    private String toTransport;
-    @Value("${info.puppy:нет данных}")
-    private String puppy;
-    @Value("${info.adultdog:нет данных}")
-    private String adultDog;
-    @Value("${info.limopport:нет данных}")
-    private String limopport;
-    @Value("${info.doghandlers:нет данных}")
-    private String dogHandlers;
-    @Value("${info.dhadvices:нет данных}")
-    private String dogHandlersAdvices;
-    @Value("${info.refuse:нет данных}")
-    private String refuse;
-    @Value("${howToGet.image.path:нет данных}")
-    private String howToGetImagePath;
-    @Value("${reportForm.image.path:нет данных}")
-    private String reportFormImagePath;
-    @Value("${info.report:нет данных}")
-    private String reportInfo;
 
     @Autowired
     private TelegramBot telegramBot;
+    @Autowired
+    private TelegramBotConfiguration configuration;
     @Autowired
     private VolunteerServiceImpl volunteerService;
     @Autowired
@@ -160,17 +131,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                     "\n +79********* - Ваше имя" + "\n 8-9**-***-**-** - Ваше имя" + "\n 8********** - Ваше имя");
                             break;
                         case ("/shelterinfo"):
-                            send = new SendMessage(chatId, shelter);
+                            send = new SendMessage(chatId, configuration.getShelter());
                             break;
                         case ("/howtoget"):
                             send = new SendMessage(chatId, "Схема проезда до нашего приюта:");
-                            photo = new SendPhoto(chatId, new File(howToGetImagePath));
+                            photo = new SendPhoto(chatId, new File(configuration.getHowToGetImagePath()));
                             break;
                         case ("/securityinfo"):
-                            send = new SendMessage(chatId, security);
+                            send = new SendMessage(chatId, configuration.getSecurity());
                             break;
                         case ("/safetyinfo"):
-                            send = new SendMessage(chatId, safety);
+                            send = new SendMessage(chatId, configuration.getSafety());
                             break;
                         case ("/pets"):
                             List<PetModel> pets = petService.findAllByIsAdopted(false);
@@ -181,35 +152,35 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             send = new SendMessage(chatId, response.toString());
                             break;
                         case ("/documents"):
-                            send = new SendMessage(chatId, documents);
+                            send = new SendMessage(chatId, configuration.getDocuments());
                             break;
                         case ("/makeacquaintance"):
-                            send = new SendMessage(chatId, acquaintance);
+                            send = new SendMessage(chatId, configuration.getAcquaintance());
                             break;
                         case ("/howtotransport"):
-                            send = new SendMessage(chatId, toTransport);
+                            send = new SendMessage(chatId, configuration.getToTransport());
                             break;
                         case ("/reportform"):
-                            send = new SendMessage(chatId, reportInfo);
-                            photo = new SendPhoto(chatId, new File(reportFormImagePath));
+                            send = new SendMessage(chatId, configuration.getReportInfo());
+                            photo = new SendPhoto(chatId, new File(configuration.getReportFormImagePath()));
                             break;
                         case ("/homeforpuppy"):
-                            send = new SendMessage(chatId, puppy);
+                            send = new SendMessage(chatId, configuration.getPuppy());
                             break;
                         case ("/homeforadultdog"):
-                            send = new SendMessage(chatId, adultDog);
+                            send = new SendMessage(chatId, configuration.getAdultDog());
                             break;
                         case ("/homeforlimopportunities"):
-                            send = new SendMessage(chatId, limopport);
+                            send = new SendMessage(chatId, configuration.getLimopport());
                             break;
                         case ("/doghandlers"):
-                            send = new SendMessage(chatId, dogHandlers);
+                            send = new SendMessage(chatId, configuration.getDogHandlers());
                             break;
                         case ("/doghandlersadvices"):
-                            send = new SendMessage(chatId, dogHandlersAdvices);
+                            send = new SendMessage(chatId, configuration.getDogHandlersAdvices());
                             break;
                         case ("/resonsforrefuse"):
-                            send = new SendMessage(chatId, refuse);
+                            send = new SendMessage(chatId, configuration.getRefuse());
                             break;
                         case ("/volonteerscontacts"):
                             VolunteerModel volunteerToContact = volunteerService.getRandomVolunteer();

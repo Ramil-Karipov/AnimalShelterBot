@@ -1,5 +1,8 @@
 package pro.sky.telegrambot.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.exception.PetNotFoundException;
 import pro.sky.telegrambot.model.PetModel;
@@ -13,6 +16,9 @@ import static pro.sky.telegrambot.model.PetModel.formatter;
 
 @Service
 public class PetServiceImpl implements PetService {
+
+    private final Logger logger = LoggerFactory.getLogger(PetServiceImpl.class);
+
     private final PetRepository petRepository;
 
     public PetServiceImpl(PetRepository petRepository) {
@@ -40,12 +46,20 @@ public class PetServiceImpl implements PetService {
         return petRepository.findById(id).orElseThrow(PetNotFoundException::new);
     }
 
-    public PetModel createPet(String name, String birthDate) {
-        PetModel createPet = new PetModel();
-        LocalDate birthDay = LocalDate.parse(birthDate, formatter);
-        createPet.setName(name);
-        createPet.setBirthDate(birthDay);
-        return addPet(createPet);
+    public PetModel createPet(String name, String birthDate) throws IllegalArgumentException {
+        if (StringUtils.isEmpty(name) || StringUtils.isBlank(name) || !StringUtils.isAlpha(name)) {
+            logger.error("Invalid name input");
+            throw new IllegalArgumentException("Invalid name input");
+        }
+        if (!birthDate.matches("^\\d{2}\\.\\d{2}\\.\\d{4}$")) {
+            logger.error("Invalid date format");
+            throw new IllegalArgumentException("Invalid date format");
+        }
+            PetModel createPet = new PetModel();
+            LocalDate birthDay = LocalDate.parse(birthDate, formatter);
+            createPet.setName(name);
+            createPet.setBirthDate(birthDay);
+            return addPet(createPet);
     }
 
     public List<PetModel> findAllByIsAdopted(Boolean isAdopted) {
