@@ -2,26 +2,32 @@ package pro.sky.telegrambot.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.File;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.configuration.TelegramBotConfiguration;
+import pro.sky.telegrambot.exception.ClientNotFoundException;
+import pro.sky.telegrambot.exception.PetNotFoundException;
 import pro.sky.telegrambot.model.PetModel;
+import pro.sky.telegrambot.model.ReportModel;
 import pro.sky.telegrambot.model.VolunteerModel;
 import pro.sky.telegrambot.service.ClientService;
 import pro.sky.telegrambot.service.PetService;
+import pro.sky.telegrambot.service.ReportService;
 import pro.sky.telegrambot.service.impl.PhoneNumberValidatorImpl;
 import pro.sky.telegrambot.service.impl.VolunteerServiceImpl;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.util.List;
 
 @Service
@@ -41,6 +47,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private PhoneNumberValidatorImpl phoneNumberValidator;
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private ReportService reportService;
 
     @PostConstruct
     public void init() {
@@ -59,23 +67,59 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 String text;
                 Long chatId;
 
+                //Общая переменная для отправки сообщений пользователю, которая будет переопределяться в зависимости от
+                //содержания отправляемых сообщений
+                SendMessage send;
+                //Общая переменная для отправки в чат ботом картинок
+                SendPhoto photo = null;
+
                 //Здесь извлекаем нужные нам данные либо из message (если команда отправлялась с клавиатуры), либо из callbackQuery (если
                 //команда отправлялась кнопкой меню и в message у нас null
                 if (message != null) {
                     text = message.text();
                     chatId = message.chat().id();
+                    //Этот блок кода отработает, если в чат-бот прислано изображение в несжатом виде с текстом
+                    if (message.document() != null) {
+                        text = message.caption();
+                        String fileId = message.document().fileId();
+                        GetFileResponse response = telegramBot.execute(new GetFile(fileId));
+                        File file = response.file();
+                        byte[] fileContent = telegramBot.getFileContent(file);
+                        try {
+                            ReportModel report = reportService.createReport(fileContent, text, chatId);
+                            send = new SendMessage(chatId, configuration.getReportReceived());
+                        } catch (ClientNotFoundException exception) {
+                            send = new SendMessage(chatId, configuration.getNeedRegistration());
+                        } catch (PetNotFoundException exception) {
+                            send = new SendMessage(chatId, configuration.getHasNoPet());
+                        }
+                        telegramBot.execute(send);
+                        return;
+                    }
+                    //Если изображение прислано в сжатом виде
+                    if (message.photo() != null) {
+                        text = message.caption();
+                        String fileId = message.photo()[3].fileId();
+                        GetFileResponse response = telegramBot.execute(new GetFile(fileId));
+                        File file = response.file();
+                        byte[] fileContent = telegramBot.getFileContent(file);
+                        try {
+                            ReportModel report = reportService.createReport(fileContent, text, chatId);
+                            send = new SendMessage(chatId, configuration.getReportReceived());
+                        } catch (ClientNotFoundException exception) {
+                            send = new SendMessage(chatId, configuration.getNeedRegistration());
+                        } catch (PetNotFoundException exception) {
+                            send = new SendMessage(chatId, configuration.getHasNoPet());
+                        }
+                        telegramBot.execute(send);
+                        return;
+                    }
                 } else if (update.callbackQuery() != null) {
                     text = update.callbackQuery().data();
                     chatId = update.callbackQuery().from().id();
                 } else {
                     return;
                 }
-
-                //Общая переменная для отправки сообщений пользователю, которая будет переопределяться в зависимости от
-                //содержания отправляемых сообщений
-                SendMessage send;
-                //Общая переменная для отправки в чат ботом картинок
-                SendPhoto photo = null;
 
                 //Обрабатываем команду /start
                 if (text.equalsIgnoreCase("/start") && message != null) {
@@ -135,7 +179,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             break;
                         case ("/howtoget"):
                             send = new SendMessage(chatId, "Схема проезда до нашего приюта:");
-                            photo = new SendPhoto(chatId, new File(configuration.getHowToGetImagePath()));
+                            photo = new SendPhoto(chatId, new java.io.File(configuration.getHowToGetImagePath()));
                             break;
                         case ("/securityinfo"):
                             send = new SendMessage(chatId, configuration.getSecurity());
@@ -162,7 +206,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                             break;
                         case ("/reportform"):
                             send = new SendMessage(chatId, configuration.getReportInfo());
-                            photo = new SendPhoto(chatId, new File(configuration.getReportFormImagePath()));
+                            photo = new SendPhoto(chatId, new java.io.File(configuration.getReportFormImagePath()));
                             break;
                         case ("/homeforpuppy"):
                             send = new SendMessage(chatId, configuration.getPuppy());

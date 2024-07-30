@@ -1,22 +1,25 @@
 package pro.sky.telegrambot.service;
 
-import pro.sky.telegrambot.dto.ReportCreateDto;
-import pro.sky.telegrambot.dto.ReportUpdateDto;
 import pro.sky.telegrambot.model.ReportModel;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
-* Сервис для работы с отчетами (добавление, редактирование, удаление)
-*/
+ * Сервис для работы с отчетами (создание, добавление, получение по id, редактирование, получение списка непринятых отчетов,
+ * проставление отметки о прочтении)
+ */
 public interface ReportService {
-    ReportModel addReport(ReportCreateDto model);
 
-    ReportModel updateReport(Integer id, ReportUpdateDto reportUpdateDto);
+    ReportModel createReport(byte[] petPhoto, String petInfo, Long chatId) throws IOException;
 
-    boolean removeReport(Integer id);
+    ReportModel addReport(ReportModel model);
 
-    List<ReportModel> getAllReports();
+    ReportModel getReportById(Integer id);
+
+    ReportModel updateReport(Integer id, ReportModel model);
+
+    List<ReportModel> getAllNotAcceptedReports();
 
     ReportModel updateAccepted(Integer id, Boolean accepted);
 }

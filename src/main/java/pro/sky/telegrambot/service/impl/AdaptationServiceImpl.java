@@ -137,6 +137,7 @@ public class AdaptationServiceImpl implements AdaptationService {
         return existingAdaptation;
     }
 
+
     /**
      * Метод для получения экземпляра <b>активного</b> процесса адаптации по идентификатору питомца
      *
@@ -207,6 +208,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
+//    @Scheduled(fixedDelay = 30000)
     private void finishAdaptations() {
         List<AdaptationModel> adaptationsToFinish = adaptationRepository.getAllAdaptationsWithFinishDateLessThen(
                 LocalDate.now());
@@ -230,6 +232,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * проблемным процессом. Вызывается по расписанию с периодичностью - раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
+//    @Scheduled(fixedDelay = 30000)
     private void sendWarnings() {
         List<AdaptationModel> adaptationsToWarn = adaptationRepository.getAllAdaptationsWithLastReportDateLessThen(
                 LocalDate.now().minusDays(1));

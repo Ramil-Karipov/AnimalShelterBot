@@ -6,11 +6,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.*;
-import pro.sky.telegrambot.dto.ReportCreateDto;
-import pro.sky.telegrambot.dto.ReportUpdateDto;
 import pro.sky.telegrambot.model.ReportModel;
 import pro.sky.telegrambot.service.ReportService;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -23,7 +25,7 @@ public class ReportController {
     }
 
     @Operation(
-            summary = "Получить все отчеты",
+            summary = "Получить все непросмотренные отчеты",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -39,19 +41,19 @@ public class ReportController {
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "404", description = "Объект не найден"),
                     @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
-            }
+            }, tags = "Reports"
     )
-    @GetMapping
+    @GetMapping("/getAllNotAccepted")
     public List<ReportModel> getReports() {
-        return reportService.getAllReports();
+        return reportService.getAllNotAcceptedReports();
     }
 
     @Operation(
-            summary = "Создать новый отчет",
+            summary = "Добавить новый отчет в БД",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Отчет создан",
+                            description = "Отчет добавлен",
                             content = {
                                     @Content(
                                             mediaType = "application/json",
@@ -61,11 +63,11 @@ public class ReportController {
                     ),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
-            }
+            }, tags = "Reports"
     )
-    @PostMapping
-    public ReportModel createReport(@RequestBody ReportCreateDto reportCreateDto) {
-        return reportService.addReport(reportCreateDto);
+    @PostMapping("/add")
+    public ReportModel addReport(@RequestBody ReportModel model) {
+        return reportService.addReport(model);
     }
 
     @Operation(
@@ -83,11 +85,11 @@ public class ReportController {
                     ),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
-            }
+            }, tags = "Reports"
     )
-    @PutMapping("/{id}")
-    public ReportModel updateReport(@PathVariable Integer id, @RequestBody ReportUpdateDto reportUpdateDto) {
-        return reportService.updateReport(id, reportUpdateDto);
+    @PutMapping("/update/{id}")
+    public ReportModel updateReport(@PathVariable Integer id, @RequestBody ReportModel model) {
+        return reportService.updateReport(id, model);
     }
 
     @Operation(
@@ -105,7 +107,7 @@ public class ReportController {
                     ),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
-            }
+            }, tags = "Reports"
     )
     @PutMapping("/update-accepted/{id}")
     public ReportModel updateAccepted(@PathVariable Integer id, @RequestBody Boolean accepted) {
@@ -113,23 +115,35 @@ public class ReportController {
     }
 
     @Operation(
-            summary = "Удалить отчет по id",
+            summary = "Загрузить фото питомца по id отчета",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Параметр изменен",
+                            description = "Фото загружено",
                             content = {
                                     @Content(
-                                            schema = @Schema(type = "boolean")
+                                            mediaType = "image/jpeg"
                                     )
                             }
                     ),
                     @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
                     @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
-            }
+            }, tags = "Reports"
     )
-    @DeleteMapping("/{id}")
-    public boolean deleteReport(@PathVariable Integer id) {
-        return reportService.removeReport(id);
+    @GetMapping("/download-photo/{id}")
+    public void downloadReportPhoto(@PathVariable int id, HttpServletResponse response) throws IOException {
+        ReportModel report = reportService.getReportById(id);
+        Path path = Path.of(report.getPetPhotoPath());
+        try (InputStream is = Files.newInputStream(path);
+             OutputStream os = response.getOutputStream();
+             BufferedInputStream bis = new BufferedInputStream(is, 1024);
+             BufferedOutputStream bos = new BufferedOutputStream(os, 1024)) {
+
+            response.setContentType(Files.probeContentType(path));
+            response.setContentLength((int) Files.size(path));
+            response.setStatus(200);
+
+            bis.transferTo(bos);
+        }
     }
 }
