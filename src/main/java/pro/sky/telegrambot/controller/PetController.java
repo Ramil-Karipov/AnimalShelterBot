@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pro.sky.telegrambot.model.PetModel;
 import pro.sky.telegrambot.service.PetService;
@@ -74,5 +71,29 @@ public class PetController {
     public PetModel findPet(@Parameter(description = "Идентификатор питомца в БД. Целое положительное число.")
                             @RequestParam Integer id) {
         return petServiceImpl.findById(id);
+    }
+
+    @Operation(
+            summary = "Изменить запись в БД о питомце.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Запись изменена",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = PetModel.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(responseCode = "400", description = "В случае, если питомец не найден"),
+                    @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
+            }, tags = "Pets"
+    )
+    @PutMapping("/update/{id}")
+    public PetModel updatePet(@Parameter(description = "Идентификатор питомца в БД. Целое положительное число.")
+                                    @PathVariable int id,
+                                    @RequestBody PetModel model) {
+        return petServiceImpl.updatePet(id, model);
     }
 }

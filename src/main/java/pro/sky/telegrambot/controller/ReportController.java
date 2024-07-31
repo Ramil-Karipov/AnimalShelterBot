@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.*;
+import pro.sky.telegrambot.exception.ReportNotFoundException;
 import pro.sky.telegrambot.model.ReportModel;
 import pro.sky.telegrambot.service.ReportService;
 
@@ -88,7 +89,7 @@ public class ReportController {
             }, tags = "Reports"
     )
     @PutMapping("/update/{id}")
-    public ReportModel updateReport(@PathVariable Integer id, @RequestBody ReportModel model) {
+    public ReportModel updateReport(@PathVariable int id, @RequestBody ReportModel model) {
         return reportService.updateReport(id, model);
     }
 
@@ -110,7 +111,7 @@ public class ReportController {
             }, tags = "Reports"
     )
     @PutMapping("/update-accepted/{id}")
-    public ReportModel updateAccepted(@PathVariable Integer id, @RequestBody Boolean accepted) {
+    public ReportModel updateAccepted(@PathVariable int id, @RequestBody Boolean accepted) {
         return reportService.updateAccepted(id, accepted);
     }
 
@@ -131,7 +132,7 @@ public class ReportController {
             }, tags = "Reports"
     )
     @GetMapping("/download-photo/{id}")
-    public void downloadReportPhoto(@PathVariable int id, HttpServletResponse response) throws IOException {
+    public void downloadReportPhoto(@PathVariable int id, HttpServletResponse response) throws IOException, ReportNotFoundException {
         ReportModel report = reportService.getReportById(id);
         Path path = Path.of(report.getPetPhotoPath());
         try (InputStream is = Files.newInputStream(path);
@@ -145,5 +146,28 @@ public class ReportController {
 
             bis.transferTo(bos);
         }
+    }
+
+    @Operation(
+            summary = "Получить текстовое содержимое по id отчета",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Текст отчета",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = String.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+                    @ApiResponse(responseCode = "500", description = "Внутрення ошибка сервера")
+            }, tags = "Reports"
+    )
+    @GetMapping("/getText/{id}")
+    public String getTextContent(@PathVariable int id) throws ReportNotFoundException {
+        ReportModel report = reportService.getReportById(id);
+        return report.getPetInfo();
     }
 }

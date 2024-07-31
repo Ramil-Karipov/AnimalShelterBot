@@ -1,6 +1,5 @@
 package pro.sky.telegrambot.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.model.ClientModel;
 import pro.sky.telegrambot.repository.ClientRepository;
@@ -36,7 +35,7 @@ public class PhoneNumberValidatorImpl {
         // Если номер не соответствует ни одному из форматов, выбрасываем исключение
         throw new IllegalArgumentException("Invalid phone number format: " + phoneNumber);
     }
-    //Метод для сохранения клиета в базе данных.
+    //Метод для сохранения клиента в базе данных.
     public static ClientModel saveClient(String message, Long chatId, ClientService clientService) {
         // Разделение сообщения на части
         String[] parts = message.split(" - ", 2);

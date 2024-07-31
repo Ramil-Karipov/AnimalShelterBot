@@ -172,7 +172,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         case ("/registration"):
                             send = new SendMessage(chatId, "Для регистрации в базе усыновителей нашего приюта, пришлите" +
                                     " сообщение, содержащее ваш номер телефона и ваше имя в формате:\n +7-9**-***-**-** - Ваше имя" +
-                                    "\n +79********* - Ваше имя" + "\n 8-9**-***-**-** - Ваше имя" + "\n 8********** - Ваше имя");
+                                    "\n +79********* - Ваше имя" + "\n 8-9**-***-**-** - Ваше имя" + "\n 89********* - Ваше имя");
                             break;
                         case ("/shelterinfo"):
                             send = new SendMessage(chatId, configuration.getShelter());

@@ -160,5 +160,4 @@ public class ReportServiceImpl implements ReportService {
     public ReportModel getReportById(Integer id) throws ReportNotFoundException {
         return reportRepository.findById(id).orElseThrow(ReportNotFoundException::new);
     }
-
 }
