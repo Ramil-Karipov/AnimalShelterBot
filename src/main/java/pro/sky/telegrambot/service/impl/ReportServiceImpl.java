@@ -80,7 +80,8 @@ public class ReportServiceImpl implements ReportService {
         }
 
         ReportModel creatingReport = new ReportModel(0, reportDate, clientId, petId, petPhotoPath, reportText, false);
-        return reportRepository.save(creatingReport);
+        reportRepository.save(creatingReport);
+        return creatingReport;
     }
 
     /**
@@ -114,7 +115,8 @@ public class ReportServiceImpl implements ReportService {
         existingReport.setPetInfo(model.getPetInfo());
         existingReport.setIsAccepted(model.getIsAccepted());
 
-        return reportRepository.save(existingReport);
+        reportRepository.save(existingReport);
+        return existingReport;
 
     }
 

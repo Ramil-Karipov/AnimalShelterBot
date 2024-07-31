@@ -104,11 +104,11 @@ public class ClientServiceImplTest {
     public void testGetClientByChatId() {
         ClientModel client = new ClientModel();
         client.setChatId(12345L);
-        when(clientRepository.findByChatId(12345L)).thenReturn(Optional.of(client));
+        when(clientRepository.findFirstByChatId(12345L)).thenReturn(Optional.of(client));
 
         ClientModel retrievedClient = clientService.getClientByChatId(12345L);
 
-        verify(clientRepository, times(1)).findByChatId(12345L);
+        verify(clientRepository, times(1)).findFirstByChatId(12345L);
         assertNotNull(retrievedClient);
         assertEquals(12345L, retrievedClient.getChatId());
     }
