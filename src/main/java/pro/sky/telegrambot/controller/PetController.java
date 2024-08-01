@@ -69,7 +69,7 @@ public class PetController {
     )
     @GetMapping("/find")
     public PetModel findPet(@Parameter(description = "Идентификатор питомца в БД. Целое положительное число.")
-                            @RequestParam Integer id) {
+                            @RequestParam int id) {
         return petServiceImpl.findById(id);
     }
 
