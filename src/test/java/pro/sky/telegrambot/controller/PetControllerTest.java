@@ -9,8 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import pro.sky.telegrambot.model.PetModel;
+import pro.sky.telegrambot.repository.PetRepository;
 import pro.sky.telegrambot.service.PetService;
 
 import java.net.URI;
@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class PetControllerTest {
 
     @LocalServerPort
@@ -28,6 +27,9 @@ class PetControllerTest {
 
     @Autowired
     PetService petServiceImpl;
+
+    @Autowired
+    PetRepository petRepository;
 
     @Autowired
     TestRestTemplate restTemplate;
@@ -43,11 +45,15 @@ class PetControllerTest {
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
+        PetModel createdPet = response.getBody();
+
         response = restTemplate.getForEntity("http://localhost:" + port +
-                "/pet/find?id=1", PetModel.class);
+                "/pet/find?id=" + createdPet.getId(), PetModel.class);
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        petRepository.deleteAll();
     }
 
     @Test
@@ -71,16 +77,18 @@ class PetControllerTest {
 
         RequestEntity<PetModel> requestEntity = new RequestEntity<>(newPet, HttpMethod.PUT, URI.create(""));
         ResponseEntity<PetModel> response = restTemplate.exchange("http://localhost:" + port +
-                "/pet/update/1", HttpMethod.PUT, requestEntity, PetModel.class);
+                "/pet/update/" + existingPet.getId(), HttpMethod.PUT, requestEntity, PetModel.class);
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
         response = restTemplate.getForEntity("http://localhost:" + port +
-                "/pet/find?id=1", PetModel.class);
+                "/pet/find?id=" + existingPet.getId(), PetModel.class);
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(LocalDate.now(), response.getBody().getBirthDate());
+
+        petRepository.deleteAll();
     }
 }

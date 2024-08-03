@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import pro.sky.telegrambot.model.AdaptationModel;
 import pro.sky.telegrambot.service.AdaptationService;
 
@@ -76,7 +78,11 @@ public class AdaptationController {
                                   @Parameter(description = "Количество дней, на которое будет продлен процесс адаптации." +
                                           "Целое положительное число.")
                                   @RequestParam Integer days) {
+        try {
             return adaptationServiceImpl.extendAdaptation(petId, days);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+        }
     }
 
     @Operation(
