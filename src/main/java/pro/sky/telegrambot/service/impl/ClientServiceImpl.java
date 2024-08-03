@@ -1,7 +1,7 @@
 package pro.sky.telegrambot.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.exception.ClientNotFoundException;
 import pro.sky.telegrambot.model.ClientModel;
 import pro.sky.telegrambot.repository.ClientRepository;
 import pro.sky.telegrambot.service.ClientService;
@@ -44,8 +44,8 @@ public class ClientServiceImpl implements ClientService {
     }
 
     public ClientModel getClientByChatId(Long chatId) {
-        Optional<ClientModel> optionalClient = clientRepository.findByChatId(chatId);
-        return optionalClient.orElse(null); // Или выбросьте исключение, если клиент не найден
+        Optional<ClientModel> optionalClient = clientRepository.findFirstByChatId(chatId);
+        return optionalClient.orElseThrow(ClientNotFoundException::new);
     }
 
 }

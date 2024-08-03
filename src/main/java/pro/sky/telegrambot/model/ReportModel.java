@@ -1,9 +1,15 @@
 package pro.sky.telegrambot.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "report")
 public class ReportModel {
     @Id
@@ -26,66 +32,37 @@ public class ReportModel {
     private String petInfo;
 
     @Column(name = "is_accepted")
-    private boolean isAccepted;
+    private Boolean isAccepted = false;
 
-    @PrePersist
-    protected void onCreate() {
-        reportDate = LocalDate.now();
+    public ReportModel() {
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
+    public ReportModel(Integer id, LocalDate reportDate, Integer clientId, Integer petId, String petPhotoPath, String petInfo, boolean isAccepted) {
         this.id = id;
-    }
-
-    public LocalDate getReportDate() {
-        return reportDate;
-    }
-
-    public void setReportDate(LocalDate reportDate) {
         this.reportDate = reportDate;
-    }
-
-    public Integer getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(Integer clientId) {
         this.clientId = clientId;
-    }
-
-    public Integer getPetId() {
-        return petId;
-    }
-
-    public void setPetId(Integer petId) {
         this.petId = petId;
-    }
-
-    public String getPetPhotoPath() {
-        return petPhotoPath;
-    }
-
-    public void setPetPhotoPath(String petPhotoPath) {
         this.petPhotoPath = petPhotoPath;
-    }
-
-    public String getPetInfo() {
-        return petInfo;
-    }
-
-    public void setPetInfo(String petInfo) {
         this.petInfo = petInfo;
+        this.isAccepted = isAccepted;
     }
 
-    public boolean isAccepted() {
-        return isAccepted;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReportModel that = (ReportModel) o;
+        return Objects.equals(getId(), that.getId()) &&
+                Objects.equals(getReportDate(), that.getReportDate()) &&
+                Objects.equals(getClientId(), that.getClientId()) &&
+                Objects.equals(getPetId(), that.getPetId()) &&
+                Objects.equals(getPetPhotoPath(), that.getPetPhotoPath()) &&
+                Objects.equals(getPetInfo(), that.getPetInfo()) &&
+                Objects.equals(getIsAccepted(), that.getIsAccepted());
     }
 
-    public void setAccepted(boolean accepted) {
-        isAccepted = accepted;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getReportDate(), getClientId(), getPetId(), getPetPhotoPath(), getPetInfo(), getIsAccepted());
     }
 }

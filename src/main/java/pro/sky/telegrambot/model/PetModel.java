@@ -23,6 +23,11 @@ public class PetModel {
     public PetModel() {
     }
 
+    public PetModel(LocalDate birthDate, String name) {
+        this.birthDate = birthDate;
+        this.name = name;
+    }
+
     public Integer getId() {
         return id;
     }

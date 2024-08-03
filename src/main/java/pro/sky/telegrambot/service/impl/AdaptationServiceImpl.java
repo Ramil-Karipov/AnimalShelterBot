@@ -137,6 +137,7 @@ public class AdaptationServiceImpl implements AdaptationService {
         return existingAdaptation;
     }
 
+
     /**
      * Метод для получения экземпляра <b>активного</b> процесса адаптации по идентификатору питомца
      *
@@ -160,12 +161,13 @@ public class AdaptationServiceImpl implements AdaptationService {
      * @param days  Количество дней, на которое будет продлен период адаптации. Целое положительное число.
      * @return {@link AdaptationModel} Период адаптации с увеличенной на переданное количество дней датой окончания.
      * @throws AdaptationNotFoundException в случае, если переданному {@code petId} питомца не соответствует ни один активный процесс адаптации
+     * @throws IllegalArgumentException в случае, если количество дней, переданное в метод, не положительно
      */
     @Override
-    public AdaptationModel extendAdaptation(Integer petId, Integer days) throws AdaptationNotFoundException {
+    public AdaptationModel extendAdaptation(Integer petId, Integer days) throws AdaptationNotFoundException, IllegalArgumentException {
         if (days <= 0) {
             logger.error("Количество дней для продления должно быть положительным.");
-            throw new RuntimeException("Invalid days value");
+            throw new IllegalArgumentException("Invalid days value");
         }
         AdaptationModel adaptationToExtend = findAdaptationByPetId(petId);
         adaptationToExtend.setFinishDate(adaptationToExtend.getFinishDate().plusDays(days));
@@ -207,6 +209,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
+//    @Scheduled(fixedDelay = 30000)
     private void finishAdaptations() {
         List<AdaptationModel> adaptationsToFinish = adaptationRepository.getAllAdaptationsWithFinishDateLessThen(
                 LocalDate.now());
@@ -216,6 +219,7 @@ public class AdaptationServiceImpl implements AdaptationService {
                     ClientModel client = clientServiceImpl.getClient(clientId).orElseThrow(ClientNotFoundException::new);
                     client.setPetId(null);
                     clientServiceImpl.updateClient(clientId, client);
+                    updateAdaptation(adaptationModel.getId(), adaptationModel);
                     sendMessageToClient(clientId, finishInfoMessage);
                 }
         );
@@ -230,6 +234,7 @@ public class AdaptationServiceImpl implements AdaptationService {
      * проблемным процессом. Вызывается по расписанию с периодичностью - раз в сутки.
      */
     @Scheduled(cron = "0 0 15 * * *")
+//    @Scheduled(fixedDelay = 30000)
     private void sendWarnings() {
         List<AdaptationModel> adaptationsToWarn = adaptationRepository.getAllAdaptationsWithLastReportDateLessThen(
                 LocalDate.now().minusDays(1));
